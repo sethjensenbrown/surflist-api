@@ -1,4 +1,11 @@
 language: node_js
 node_js: node
 services:
-    - mongodb
+- mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: c19bKjZPC1+CCDrTdGo1bdyehM7ZzHN6IpJ124XxDH9NlHnwZFIdWoESDk5Xn/PQSwjmlI2Jg1pwt0wsoLsfLaPxTUVMFxOCp8HJnSiRBm8qJApz+RXO5rySTWq6KLKsvMKoXZIudQz+rxharw3Q/HZniLqTQR//tla77XDN2yIUhc3Vpx7YU2zNGcB9yjjiHl0m83UUoPqrPngoxZPwIbj8A4g2u+sXRZSnQaai889ojPaA2ks5Cw06LXAnfbc/K/p+YQaaFIm24g3HlWGQfjbk1YsbkAv8n8XmrahixhkK40oneb+9OxPaQ0jMJ+AYS6XX6tSkBYAnuf014Ow8161QT7m4b9gHLz78g8mNILLd05p841jI+NZCj4GARNRnOdEXtAyn5M6PhhMTvNXnvMQ+eqGUmacGyyCewDca670skd3aEASYWUIoRcWGWvZ3Td462QSsxJUrEuqKPaDqkoi4JsKhZbPp+BOBSXYPLqxu6s7riDo/QMqAZHdtfjUMYnpLDkAGoIPgodWqkRoi5vQJoVvM7Qf5jeGKhO7G8HGrEPZMzCcZNptWlNEg6WYMi+ZELvoblh0i7t6lIy3dqLKL0ZmXwfDZ6RlU+IlOWM6jm1Hb0VaIacd6BsxE01lZqdwI+gsCp3Vl2hKQFHuVWdFBeJ0oaNDMcB7TpbMRZLU=
+  app: boiling-meadow-48827
+  on:
+    repo: sethjensenbrown/surflist-api
