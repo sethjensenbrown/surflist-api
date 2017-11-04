@@ -1,3 +1,5 @@
+//SETUP
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -10,6 +12,7 @@ mongoose.Promise = global.Promise;
 
 const app = express();
 const {PORT, DATABASE_URL, CLIENT_ORIGIN} = require('./config');
+const {Boards} = require('./models');
 
 app.use(
     cors({
@@ -19,9 +22,68 @@ app.use(
 app.use(bodyParser.json());
 app.use(morgan('common'));
 
-app.get('/api/*', (req, res) => {
-	res.json({ok: true});
+/************************************************************/
+
+//API
+
+//GET request returns boards filtered by query
+app.get('/api/boards/', (req, res) => {
+	Boards
+		.find(req.query)
+		.then((results) => res.json(results))
+		.catch((err) => {
+			console.error(err);
+			res.status(500).json({message: 'Internal server error'});
+		});
+});;
+
+//POST request adds new board to database
+app.post('/api/boards/', (req, res) => {
+	Boards
+		.create(req.body)
+		.then((newBoard) => {
+			console.log(`Added Board with _id: ${newBoard._id}`)
+			res.status(201).json({message: 'Board successfully added'});
+		})
+		.catch(err => {
+			console.error(err);
+			response.status(500).json({message: 'Internal server error'});
+		});
 });
+
+//PUT endpoint for editing boards
+app.put('/api/boards/', (req, res) => {
+	if (!(req.query._id === req.body._id)) {
+		res.status(400).json({error: 'Request path id must match request body id'});
+	}
+
+	Boards
+		.findByIdAndUpdate(req.query._id, {$set: req.body}, {new: true})
+		.then(() => {
+			console.log(`Updated Board with _id: ${req.query._id}`);
+			res.status(201).json({message: 'Board successfully updated'});
+		})
+		.catch(err => {
+			console.error(err);
+			response.status(500).json({message: 'Internal server error'});
+		});
+
+});
+
+//DELETE endpoint
+app.delete('/api/boards/', (req,res) => {
+	Boards
+		.findByIdAndRemove(req.query._id)
+		.then(() => {
+			console.log(`Deleted Board with _id: ${req.query._id}`);
+			res.status(204).json({message: 'Board successfully deleted'});
+		})
+		.catch((err) => {
+			console.error(err)
+			res.status(500).json({message: 'Internal server error'});
+		});
+}); 
+
 
 /************************************************************/
 

@@ -8,7 +8,7 @@ const {TEST_DATABASE_URL} = require('../config');
 const should = chai.should();
 chai.use(chaiHttp);
 
-describe('API', function() {
+describe('Surflist API', function() {
 
 	before(function() {
 		return runServer(TEST_DATABASE_URL);
