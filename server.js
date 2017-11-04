@@ -30,7 +30,7 @@ app.use(morgan('common'));
 app.get('/api/boards/', (req, res) => {
 	Boards
 		.find(req.query)
-		.then((results) => res.json(results))
+		.then((results) => res.status(200).json(results))
 		.catch((err) => {
 			console.error(err);
 			res.status(500).json({message: 'Internal server error'});
