@@ -5,6 +5,7 @@ const boardSchema = mongoose.Schema({
 	'price': {type: Number, required: true},
 	'description': {type: String, required: true},
 	'state': {type: String, required: true},
+	'zip': {type: Number, required: true},
 	'location': {
 		'type': {type: String, required: true},
 		'coordinates': {type: Array, required: true}

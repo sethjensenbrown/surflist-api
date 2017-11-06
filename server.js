@@ -28,8 +28,97 @@ app.use(morgan('common'));
 
 //GET request returns boards filtered by query
 app.get('/api/boards/', (req, res) => {
+	let query = req.query;
+	//now sort query and convert to mongoDB query notation
+	let dbQuery = {};
+	if(query.zip) {
+        //this is the mongoDB geolocation query format
+        dbQuery.location = { 
+            $near: {
+                $geometry: { 
+                    type: "Point",  
+                    coordinates: [
+                        parseFloat(query.lng, 10), 
+                        parseFloat(query.lat, 10)
+                    ] 
+                },
+                $maxDistance: (parseInt(query.radius, 10)*1609) //conversion from mi to m
+            }
+        }
+	}
+	//matches state name
+	if(query.state) {
+	    dbQuery.state = query.state;
+	}
+	//filters price
+	if (query['price-min']) {
+	    dbQuery.price = {$gt: query['price-min']};
+	}
+	if (query['price-max']) {
+	    dbQuery.price = Object.assign({}, dbQuery.price, {$lt: query['price-max']});
+	}
+	//filters board-condition using $in: array format
+	//allows for multiple conditions
+	if (query['condition-new']) {
+	    dbQuery['board-condition'] = {'$in': ['condition-new']};
+	}
+	if (query['condition-great']) {
+	    if(dbQuery['board-condition']) {
+	        dbQuery['board-condition']['$in'].push('condition-great');
+	    }
+	    else {
+	        dbQuery['board-condition'] = {'$in': ['condition-great']};
+	    }
+	}
+	if (query['condition-decent']) {
+	    if(dbQuery['board-condition']) {
+	        dbQuery['board-condition']['$in'].push('condition-decent');
+	    }
+	    else {
+	        dbQuery['board-condition'] = {'$in': ['condition-decent']};
+	    }
+	}
+	if (query['condition-wrecked']) {
+	    if(dbQuery['board-condition']) {
+	        dbQuery['board-condition']['$in'].push('condition-wrecked');
+	    }
+	    else {
+	        dbQuery['board-condition'] = {'$in': ['condition-wrecked']};
+	    }
+	}
+	//filters board-condition using $in: array format
+	//allows for multiple conditions
+	if (query['type-short']) {
+	    dbQuery['board-type'] = {'$in': ['type-short']};
+	}
+	if (query['type-fun']) {
+	    if(dbQuery['board-type']) {
+	        dbQuery['board-type']['$in'].push('type-fun');
+	    }
+	    else {
+	        dbQuery['board-type'] = {'$in': ['type-fun']};
+	    }
+	}
+	if (query['type-long']) {
+	    if(dbQuery['board-type']) {
+	        dbQuery['board-type']['$in'].push('type-long');
+	    }
+	    else {
+	        dbQuery['board-type'] = {'$in': ['type-long']};
+	    }
+	}
+	if (query['type-sup']) {
+	    if(dbQuery['board-type']) {
+	        dbQuery['board-type']['$in'].push('type-sup');
+	    }
+	    else {
+	        dbQuery['board-type'] = {'$in': ['type-sup']};
+	    }
+	}
+
+
 	Boards
-		.find(req.query)
+		.find(dbQuery)
 		.then((results) => res.status(200).json(results))
 		.catch((err) => {
 			console.error(err);
@@ -56,17 +145,18 @@ app.put('/api/boards/', (req, res) => {
 	if (!(req.query._id === req.body._id)) {
 		res.status(400).json({error: 'Request path id must match request body id'});
 	}
-
-	Boards
-		.findByIdAndUpdate(req.query._id, {$set: req.body}, {new: true})
-		.then(() => {
-			console.log(`Updated Board with _id: ${req.query._id}`);
-			res.status(201).json({message: 'Board successfully updated'});
-		})
-		.catch(err => {
-			console.error(err);
-			response.status(500).json({message: 'Internal server error'});
-		});
+	else {
+		Boards
+			.findByIdAndUpdate(req.query._id, {$set: req.body}, {new: true})
+			.then(() => {
+				console.log(`Updated Board with _id: ${req.query._id}`);
+				res.status(201).json({message: 'Board successfully updated'});
+			})
+			.catch(err => {
+				console.error(err);
+				response.status(500).json({message: 'Internal server error'});
+			});
+	}
 
 });
 
