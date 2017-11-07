@@ -31,8 +31,11 @@ app.get('/api/boards/', (req, res) => {
 	let query = req.query;
 	//now sort query and convert to mongoDB query notation
 	let dbQuery = {};
+	if(query._id) {
+		dbQuery._id = query._id;
+	}
+	//this is the mongoDB geolocation query format
 	if(query.zip) {
-        //this is the mongoDB geolocation query format
         dbQuery.location = { 
             $near: {
                 $geometry: { 
@@ -115,8 +118,7 @@ app.get('/api/boards/', (req, res) => {
 	        dbQuery['board-type'] = {'$in': ['type-sup']};
 	    }
 	}
-
-
+	//then does the actual db query
 	Boards
 		.find(dbQuery)
 		.then((results) => res.status(200).json(results))
