@@ -62,10 +62,10 @@ app.get('/api/boards/', (req, res) => {
 	}
 	//filters board-condition using $in: array format
 	//allows for multiple conditions
-	if (query['condition-new']) {
+	if (query['condition-new'] === 'true') {
 	    dbQuery['board-condition'] = {'$in': ['condition-new']};
 	}
-	if (query['condition-great']) {
+	if (query['condition-great'] === 'true') {
 	    if(dbQuery['board-condition']) {
 	        dbQuery['board-condition']['$in'].push('condition-great');
 	    }
@@ -73,7 +73,7 @@ app.get('/api/boards/', (req, res) => {
 	        dbQuery['board-condition'] = {'$in': ['condition-great']};
 	    }
 	}
-	if (query['condition-decent']) {
+	if (query['condition-decent'] === 'true') {
 	    if(dbQuery['board-condition']) {
 	        dbQuery['board-condition']['$in'].push('condition-decent');
 	    }
@@ -81,7 +81,7 @@ app.get('/api/boards/', (req, res) => {
 	        dbQuery['board-condition'] = {'$in': ['condition-decent']};
 	    }
 	}
-	if (query['condition-wrecked']) {
+	if (query['condition-wrecked'] === 'true') {
 	    if(dbQuery['board-condition']) {
 	        dbQuery['board-condition']['$in'].push('condition-wrecked');
 	    }
@@ -91,10 +91,10 @@ app.get('/api/boards/', (req, res) => {
 	}
 	//filters board-condition using $in: array format
 	//allows for multiple conditions
-	if (query['type-short']) {
+	if (query['type-short'] === 'true') {
 	    dbQuery['board-type'] = {'$in': ['type-short']};
 	}
-	if (query['type-fun']) {
+	if (query['type-fun'] === 'true') {
 	    if(dbQuery['board-type']) {
 	        dbQuery['board-type']['$in'].push('type-fun');
 	    }
@@ -102,7 +102,7 @@ app.get('/api/boards/', (req, res) => {
 	        dbQuery['board-type'] = {'$in': ['type-fun']};
 	    }
 	}
-	if (query['type-long']) {
+	if (query['type-long'] === 'true') {
 	    if(dbQuery['board-type']) {
 	        dbQuery['board-type']['$in'].push('type-long');
 	    }
@@ -110,7 +110,7 @@ app.get('/api/boards/', (req, res) => {
 	        dbQuery['board-type'] = {'$in': ['type-long']};
 	    }
 	}
-	if (query['type-sup']) {
+	if (query['type-sup'] === 'true') {
 	    if(dbQuery['board-type']) {
 	        dbQuery['board-type']['$in'].push('type-sup');
 	    }
@@ -118,6 +118,7 @@ app.get('/api/boards/', (req, res) => {
 	        dbQuery['board-type'] = {'$in': ['type-sup']};
 	    }
 	}
+	console.log(dbQuery);
 	//then does the actual db query
 	Boards
 		.find(dbQuery)
