@@ -6,12 +6,13 @@ const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+var request = require("request");
 
 //forces mongoose to use es6 promises instead of it's own
 mongoose.Promise = global.Promise;
 
 const app = express();
-const {PORT, DATABASE_URL, CLIENT_ORIGIN} = require('./config');
+const {PORT, DATABASE_URL, CLIENT_ORIGIN, SENDINBLUE_API_KEY} = require('./config');
 const {Boards} = require('./models');
 
 app.use(
@@ -62,60 +63,60 @@ app.get('/api/boards/', (req, res) => {
 	}
 	//filters board-condition using $in: array format
 	//allows for multiple conditions
-	if (query['condition-new'] === 'true') {
-	    dbQuery['board-condition'] = {'$in': ['condition-new']};
+	if (query['new'] === 'true') {
+	    dbQuery['board-condition'] = {'$in': ['new']};
 	}
-	if (query['condition-great'] === 'true') {
+	if (query['great'] === 'true') {
 	    if(dbQuery['board-condition']) {
-	        dbQuery['board-condition']['$in'].push('condition-great');
+	        dbQuery['board-condition']['$in'].push('great');
 	    }
 	    else {
-	        dbQuery['board-condition'] = {'$in': ['condition-great']};
+	        dbQuery['board-condition'] = {'$in': ['great']};
 	    }
 	}
-	if (query['condition-decent'] === 'true') {
+	if (query['decent'] === 'true') {
 	    if(dbQuery['board-condition']) {
-	        dbQuery['board-condition']['$in'].push('condition-decent');
+	        dbQuery['board-condition']['$in'].push('decent');
 	    }
 	    else {
-	        dbQuery['board-condition'] = {'$in': ['condition-decent']};
+	        dbQuery['board-condition'] = {'$in': ['decent']};
 	    }
 	}
-	if (query['condition-wrecked'] === 'true') {
+	if (query['wrecked'] === 'true') {
 	    if(dbQuery['board-condition']) {
-	        dbQuery['board-condition']['$in'].push('condition-wrecked');
+	        dbQuery['board-condition']['$in'].push('wrecked');
 	    }
 	    else {
-	        dbQuery['board-condition'] = {'$in': ['condition-wrecked']};
+	        dbQuery['board-condition'] = {'$in': ['wrecked']};
 	    }
 	}
-	//filters board-condition using $in: array format
+	//filters board-type using $in: array format
 	//allows for multiple conditions
-	if (query['type-short'] === 'true') {
-	    dbQuery['board-type'] = {'$in': ['type-short']};
+	if (query['shortboard'] === 'true') {
+	    dbQuery['board-type'] = {'$in': ['shortboard']};
 	}
-	if (query['type-fun'] === 'true') {
+	if (query['funboard'] === 'true') {
 	    if(dbQuery['board-type']) {
-	        dbQuery['board-type']['$in'].push('type-fun');
+	        dbQuery['board-type']['$in'].push('funboard');
 	    }
 	    else {
-	        dbQuery['board-type'] = {'$in': ['type-fun']};
+	        dbQuery['board-type'] = {'$in': ['funboard']};
 	    }
 	}
-	if (query['type-long'] === 'true') {
+	if (query['longboard'] === 'true') {
 	    if(dbQuery['board-type']) {
-	        dbQuery['board-type']['$in'].push('type-long');
+	        dbQuery['board-type']['$in'].push('longboard');
 	    }
 	    else {
-	        dbQuery['board-type'] = {'$in': ['type-long']};
+	        dbQuery['board-type'] = {'$in': ['longboard']};
 	    }
 	}
-	if (query['type-sup'] === 'true') {
+	if (query['sup'] === 'true') {
 	    if(dbQuery['board-type']) {
-	        dbQuery['board-type']['$in'].push('type-sup');
+	        dbQuery['board-type']['$in'].push('sup');
 	    }
 	    else {
-	        dbQuery['board-type'] = {'$in': ['type-sup']};
+	        dbQuery['board-type'] = {'$in': ['sup']};
 	    }
 	}
 	console.log(dbQuery);
@@ -129,12 +130,45 @@ app.get('/api/boards/', (req, res) => {
 		});
 });;
 
-//POST request adds new board to database
+//POST request adds new board to database and sends conrol email to user's provided email
 app.post('/api/boards/', (req, res) => {
 	Boards
 		.create(req.body)
 		.then((newBoard) => {
-			console.log(`Added Board with _id: ${newBoard._id}`)
+			console.log(`Added Board with _id: ${newBoard._id}`);
+
+			//sends email to user when board is posted using SendInBlue API
+			//email contains link to the posting and edit/delete portal
+			var options = { method: 'POST',
+			  url: 'https://api.sendinblue.com/v3/smtp/email',
+			  body: 
+			   { sender: { email: 'surflist.info@gmail.com' },
+			   	 to: [ { email: `${newBoard.email}` } ],
+			     htmlContent: '<h1 style="font-family: Helvetica;font-weight: normal;font-size: 40px">surflist.</h1>' +
+        			'<h5 style="font-family: Helvetica;font-weight: normal;font-size: 16px">buy + sell surfboards</h5>' +
+			        '<hr />' +
+			        '<p>Congratulations! Your board is all set up on Surflist! ' + 
+			        'To see your post or share it with your friends, check out this link: </p>' +
+			        `<a href="${CLIENT_ORIGIN}/board?_id=${newBoard._id}">${CLIENT_ORIGIN}/board?_id=${newBoard._id}</a>` +
+			        '<p>If you want to make any changes to what you posted or delete your board, check out this link:</p>' +
+			        `<a href="${CLIENT_ORIGIN}/edit-board?_id=${newBoard._id}">${CLIENT_ORIGIN}/edit-board?_id=${newBoard._id}</a>` +
+			        '<p>Otherwise, sit back and watch the offers roll in!' +
+			        'If you have any questions, reach out to us by email at ' + 
+			        '<a href="mailto:surflist.info@gmail.com?Subject=SurfList%20 Seller%20Question">' +
+			        'surflist.info@gmail.com</a></p>',
+			     subject: `Your Board for Sale on SurfList`,
+			     replyTo: { email: 'surflist.info@gmail.com' } },
+			  json: true, 
+			  headers: { 
+			  	'api-key': SENDINBLUE_API_KEY
+			  }
+			};
+			request(options, function (error, response, body) {
+			  if (error) throw new Error(error);
+			  console.log(body);
+			});
+
+
 			res.status(201).json({message: 'Board successfully added'});
 		})
 		.catch(err => {
