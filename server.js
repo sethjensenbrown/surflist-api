@@ -198,10 +198,10 @@ app.put('/api/boards/', (req, res) => {
 
 });
 
-//DELETE endpoint
+//DELETE endpoint for boards
 app.delete('/api/boards/', (req,res) => {
 	Boards
-		.findByIdAndRemove(req.query._id)
+		.find(req.query._id)
 		.then(() => {
 			console.log(`Deleted Board with _id: ${req.query._id}`);
 			res.status(204).json({message: 'Board successfully deleted'});
@@ -211,6 +211,50 @@ app.delete('/api/boards/', (req,res) => {
 			res.status(500).json({message: 'Internal server error'});
 		});
 }); 
+
+//Make an Offer email endpoint
+app.post('/api/offer/', (req, res) => {
+	//find the board info for the board being offered
+	let board = {};
+	Boards
+		.find({_id: req.query._id})
+		.then(_res => {
+			let board = _res[0];
+			//sends email to user who posted the board with the message and email address provided by the user making the offer
+			var options = { method: 'POST',
+			  url: 'https://api.sendinblue.com/v3/smtp/email',
+			  body: 
+			   { sender: { email: 'surflist.info@gmail.com' },
+			   	 to: [ { email: `${board.email}` } ],
+			     htmlContent: '<h1 style="font-family: Helvetica;font-weight: normal;font-size: 40px">surflist.</h1>' +
+					'<h5 style="font-family: Helvetica;font-weight: normal;font-size: 16px">buy + sell surfboards</h5>' +
+			        '<hr />' +
+			        '<p>You got an offer for the board at this link: </p>' +
+			        `<a href="${CLIENT_ORIGIN}/board?_id=${board._id}">${CLIENT_ORIGIN}/board?_id=${board._id}</a>` +
+			        "<p>Here's the message and the email of the person making the offer. " +
+			        "It's up to you to decide if you want to reply. Good luck, and happy haggling!</p><hr/>" +
+			        `<p>Email: <a href="mailto:${req.body.email}?Subject=SurfList%20Seller%20Response">${req.body.email}</a></p>` +
+			        `<p>Message: ${req.body.message}</p>`,
+			     subject: `You Got an Offer on Your Board!`,
+			     replyTo: { email: 'surflist.info@gmail.com' } },
+			  json: true, 
+			  headers: { 
+			  	'api-key': SENDINBLUE_API_KEY
+			  }
+			};
+			let responseBody;
+			request(options, function (error, response, body) {
+			  if (error) throw new Error(error);
+			  console.log(body);
+			});
+			res.status(200).json({message: 'offer successfully sent'}); 
+
+		})
+		.catch((err) => {
+			console.error(err)
+			res.status(500).json({message: 'Internal server error'});
+		});
+});
 
 
 /************************************************************/
