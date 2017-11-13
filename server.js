@@ -150,9 +150,10 @@ app.post('/api/boards/', (req, res) => {
 			        '<p>Congratulations! Your board is all set up on Surflist! ' + 
 			        'To see your post or share it with your friends, check out this link: </p>' +
 			        `<a href="${CLIENT_ORIGIN}/board?_id=${newBoard._id}">${CLIENT_ORIGIN}/board?_id=${newBoard._id}</a>` +
-			        '<p>If you want to make any changes to what you posted or delete your board, check out this link:</p>' +
+			        '<p>If you want to make any changes to what you posted, ' +
+			        'or delete your board from SurfList, check out this link:</p>' +
 			        `<a href="${CLIENT_ORIGIN}/edit-board?_id=${newBoard._id}">${CLIENT_ORIGIN}/edit-board?_id=${newBoard._id}</a>` +
-			        '<p>Otherwise, sit back and watch the offers roll in!' +
+			        '<p>Otherwise, sit back and watch the offers roll in! ' +
 			        'If you have any questions, reach out to us by email at ' + 
 			        '<a href="mailto:surflist.info@gmail.com?Subject=SurfList%20 Seller%20Question">' +
 			        'surflist.info@gmail.com</a></p>',
