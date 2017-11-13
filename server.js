@@ -220,6 +220,7 @@ app.post('/api/offer/', (req, res) => {
 		.find({_id: req.query._id})
 		.then(_res => {
 			let board = _res[0];
+			console.log(board);
 			//sends email to user who posted the board with the message and email address provided by the user making the offer
 			var options = { method: 'POST',
 			  url: 'https://api.sendinblue.com/v3/smtp/email',
