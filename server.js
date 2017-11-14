@@ -201,7 +201,7 @@ app.put('/api/boards/', (req, res) => {
 //DELETE endpoint for boards
 app.delete('/api/boards/', (req,res) => {
 	Boards
-		.find(req.query._id)
+		.findByIdAndRemove(req.query._id)
 		.then(() => {
 			console.log(`Deleted Board with _id: ${req.query._id}`);
 			res.status(204).json({message: 'Board successfully deleted'});
