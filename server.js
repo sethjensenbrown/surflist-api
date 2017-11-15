@@ -36,7 +36,7 @@ app.get('/api/boards/', (req, res) => {
 		dbQuery._id = query._id;
 	}
 	//this is the mongoDB geolocation query format
-	if(query.zip) {
+	if(query.lat && query.lng && query.radius) {
         dbQuery.location = { 
             $near: {
                 $geometry: { 
@@ -167,10 +167,11 @@ app.post('/api/boards/', (req, res) => {
 			request(options, function (error, response, body) {
 			  if (error) throw new Error(error);
 			  console.log(body);
+			  res.status(201).json({
+				message: `Board successfully added`,
+				id: `${newBoard._id}`,
+				emailSent: true});
 			});
-
-
-			res.status(201).json({message: 'Board successfully added'});
 		})
 		.catch(err => {
 			console.error(err);
@@ -188,7 +189,8 @@ app.put('/api/boards/', (req, res) => {
 			.findByIdAndUpdate(req.query._id, {$set: req.body}, {new: true})
 			.then(() => {
 				console.log(`Updated Board with _id: ${req.query._id}`);
-				res.status(201).json({message: 'Board successfully updated'});
+				res.status(201).json({message: 'Board successfully updated',
+					id: `${req.query._id}`});
 			})
 			.catch(err => {
 				console.error(err);
@@ -204,7 +206,7 @@ app.delete('/api/boards/', (req,res) => {
 		.findByIdAndRemove(req.query._id)
 		.then(() => {
 			console.log(`Deleted Board with _id: ${req.query._id}`);
-			res.status(204).json({message: 'Board successfully deleted'});
+			res.status(204).end();
 		})
 		.catch((err) => {
 			console.error(err)
@@ -220,7 +222,6 @@ app.post('/api/offer/', (req, res) => {
 		.find({_id: req.query._id})
 		.then(_res => {
 			let board = _res[0];
-			console.log(board);
 			//sends email to user who posted the board with the message and email address provided by the user making the offer
 			var options = { method: 'POST',
 			  url: 'https://api.sendinblue.com/v3/smtp/email',
@@ -247,8 +248,10 @@ app.post('/api/offer/', (req, res) => {
 			request(options, function (error, response, body) {
 			  if (error) throw new Error(error);
 			  console.log(body);
-			});
-			res.status(200).json({message: 'offer successfully sent'}); 
+			  res.status(200).json({message: 'Offer successfully sent',
+					id: `${req.query.id}`,
+					emailSent: true});
+			}); 
 
 		})
 		.catch((err) => {
